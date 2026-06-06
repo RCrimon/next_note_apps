@@ -1,17 +1,17 @@
 "use client";
-import React from 'react';
+import React, { useContext } from 'react';
 import { useRouter } from 'next/navigation';
 import { User, Mail, LogOut, Edit3, ArrowLeft, Camera } from 'lucide-react';
+import { userDataContext } from '@/src/context/UserContext';
+import { signOut } from 'next-auth/react';
+
 
 export default function MyProfilePage() {
   const router = useRouter();
+  const {user} = useContext(userDataContext) as any
+  console.log(user?.name)
 
-  // Temporary user data (Ekhane apnar backend/session theke data ashbe)
-  const user = {
-    name: "Rimon Chowdhury",
-    email: "rimon@example.com",
-    image: null // Jodi image thake tobe URL hobe
-  };
+
 
   return (
     <div className="min-h-screen bg-zinc-50 dark:bg-black font-sans p-4 md:p-8">
@@ -37,8 +37,8 @@ export default function MyProfilePage() {
             <div className="relative -top-12 flex justify-center">
               <div className="relative">
                 <div className="w-32 h-32 rounded-full border-4 border-white dark:border-zinc-900 bg-zinc-200 dark:bg-zinc-800 flex items-center justify-center overflow-hidden shadow-lg">
-                  {user.image ? (
-                    <img src={user.image} alt="Profile" className="w-full h-full object-cover" />
+                  {user?.image ? (
+                    <img src={user?.image} alt="Profile" className="w-full h-full object-cover" />
                   ) : (
                     <User className="w-16 h-16 text-zinc-400" />
                   )}
@@ -53,7 +53,7 @@ export default function MyProfilePage() {
             {/* User Details */}
             <div className="text-center -mt-8 mb-8">
               <div className="flex items-center justify-center gap-2">
-                <h2 className="text-2xl font-bold text-zinc-800 dark:text-white">{user.name}</h2>
+                <h2 className="text-2xl font-bold text-zinc-800 dark:text-white">{user?.name}</h2>
               </div>
             </div>
 
@@ -65,7 +65,7 @@ export default function MyProfilePage() {
                 </div>
                 <div className="text-left">
                   <p className="text-xs text-zinc-500 dark:text-zinc-500 uppercase font-semibold">Email Address</p>
-                  <p className="text-zinc-700 dark:text-zinc-200">{user.email}</p>
+                  <p className="text-zinc-700 dark:text-zinc-200">{user?.email}</p>
                 </div>
               </div>
             </div>
@@ -76,7 +76,7 @@ export default function MyProfilePage() {
                 Edit Profile Settings
               </button>
               
-              <button className="w-full py-3 flex items-center justify-center gap-2 text-red-500 font-semibold hover:bg-red-50 dark:hover:bg-red-950/20 rounded-xl transition-colors border border-transparent hover:border-red-100 dark:hover:border-red-900/50">
+              <button className="w-full py-3 flex items-center justify-center gap-2 text-red-500 font-semibold hover:bg-red-50 dark:hover:bg-red-950/20 rounded-xl transition-colors border border-transparent hover:border-red-100 dark:hover:border-red-900/50" onClick={()=> signOut({callbackUrl: '/login'})}>
                 <LogOut className="w-5 h-5" />
                 Logout Account
               </button>

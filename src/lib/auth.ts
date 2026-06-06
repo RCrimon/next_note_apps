@@ -32,7 +32,7 @@ export const authOption : NextAuthOptions={
    }
 
    return{
-    id: user._id,
+    id: user._id.toString(),
     email: user.email,
     name: user.name,
     image: user.image
@@ -53,9 +53,10 @@ export const authOption : NextAuthOptions={
        if(!existUser){
         existUser = await User.create({
           name:user.name,
-          email:user.email
+          email:user.email,
+          image:user.image
         })
-        user.id = existUser._id as string
+        user.id = existUser._id.toString();
        }
     }
     return true

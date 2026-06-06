@@ -3,6 +3,7 @@ import React from 'react';
 import Link from 'next/link';
 import { Mail, Lock} from 'lucide-react'; 
 import { FcGoogle } from "react-icons/fc";
+import { signIn } from 'next-auth/react';
 
 export default function LoginPage() {
   return (
@@ -38,6 +39,7 @@ export default function LoginPage() {
           <button 
             type="submit" 
             className="w-full py-3 bg-amber-600 hover:bg-amber-700 text-white font-semibold rounded-lg shadow-lg hover:shadow-amber-500/30 transition-all active:scale-95"
+            
           >
             Login
           </button>
@@ -53,6 +55,11 @@ export default function LoginPage() {
         {/* Google Login Button */}
         <button 
           className="w-full py-3 flex items-center justify-center gap-3 border border-zinc-200 dark:border-zinc-700 rounded-lg hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors mb-6 text-zinc-700 dark:text-zinc-300"
+          onClick={async()=>{
+              await signIn('google',{
+                callbackUrl:'/'
+              })
+            }}
         >
           <FcGoogle />
           Continue with Google
