@@ -9,7 +9,12 @@ export async function GET(req:NextRequest, {params} : {params: Promise<{id:strin
  const note = await Note.findById(id)
  console.log(note)
  return NextResponse.json(note)
- } catch (error) {
- return NextResponse.json(error)
- }
+ } catch (error: any) {
+    console.error("Registration Error:", error);
+    
+    return NextResponse.json(
+      { message: error.message || "Something went wrong" }, 
+      { status: 500 }
+    );
+  }
 }

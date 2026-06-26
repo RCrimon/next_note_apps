@@ -16,7 +16,12 @@ export async function PUT(req:NextRequest,{params} :{params:Promise<{id:string}>
     return NextResponse.json({message:'user note not update'},{status:400})
   }
   return NextResponse.json({message:'user note update succesfully'},{status:200})
- } catch (error) {
-  return NextResponse.json({error})
- }
+ } catch (error: any) {
+    console.error("Registration Error:", error);
+    
+    return NextResponse.json(
+      { message: error.message || "Something went wrong" }, 
+      { status: 500 }
+    );
+  }
 }

@@ -18,8 +18,13 @@ export async function POST( req: NextRequest){
     })
     await newUser.save()
    return NextResponse.json({message:'user register succesfully'})
-  } catch (error) {
-   return Error('error')
+  } catch (error: any) {
+    console.error("Registration Error:", error);
+    
+    return NextResponse.json(
+      { message: error.message || "Something went wrong" }, 
+      { status: 500 }
+    );
   }
   
 }

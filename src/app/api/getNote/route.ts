@@ -14,7 +14,12 @@ export async function GET(req:NextRequest){
   const loggedInUserId = session.user.id;
   const userNotes = await Note.find({ userId: loggedInUserId }).sort({ createdAt: -1 });
   return NextResponse.json(userNotes, { status: 200 });
- } catch (error) {
-  return NextResponse.json(error)
- }
+ } catch (error: any) {
+    console.error("Registration Error:", error);
+    
+    return NextResponse.json(
+      { message: error.message || "Something went wrong" }, 
+      { status: 500 }
+    );
+  }
 }

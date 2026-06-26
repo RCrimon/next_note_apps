@@ -18,8 +18,12 @@ export async function POST(req:NextRequest){
       userId: logedUserId
     })
     return NextResponse.json(result)
-  } catch (error) {
-    console.log(error)
-     return NextResponse.json(error)
+  } catch (error: any) {
+    console.error("Registration Error:", error);
+    
+    return NextResponse.json(
+      { message: error.message || "Something went wrong" }, 
+      { status: 500 }
+    );
   }
 }
