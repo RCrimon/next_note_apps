@@ -17,12 +17,12 @@ export const authOption: NextAuthOptions = {
         let email = credentials?.email;
         let password = credentials?.password;
         if (!email || !password) {
-          throw new Error('all fields must be filled up'); // Error tracking format thik kora holo
+          throw new Error('all fields must be filled up');
         }
 
         await connectDb();
-        let user = await User.findOne({email});
-        if (!user) {
+        let user = await User.findOne({ email });
+        if (!user || !user.password) { // 👈 Google user jodi password chada thake
           throw new Error('user cannot be matched');
         }
         let isMatch = await bcrypt.compare(password, user.password);
@@ -30,7 +30,6 @@ export const authOption: NextAuthOptions = {
           throw new Error('user cannot be matched');
         }
 
-        // Return object-er sathe user ID pass hocche
         return {
           id: user._id.toString(),
           email: user.email,
@@ -47,17 +46,23 @@ export const authOption: NextAuthOptions = {
   callbacks: {
     async signIn({ account, user }) {
       if (account?.provider === 'google') {
-        await connectDb();
-        let existUser = await User.findOne({ email: user.email });
-        if (!existUser) {
-          existUser = await User.create({
-            name: user.name,
-            email: user.email,
-            image: user.image
-          });
+        try {
+          await connectDb();
+          let existUser = await User.findOne({ email: user.email });
+          if (!existUser) {
+            existUser = await User.create({
+              name: user.name,
+              email: user.email,
+              image: user.image,
+              // password field blank thakbe google sign-in er jonno
+            });
+          }
+          user.id = existUser._id.toString();
+          return true;
+        } catch (error) {
+          console.error("Error in signIn callback:", error);
+          return false; // Error hole direct false hobe, jate crash na hoy
         }
-        // FIX: User thakuk ba na thakuk, database ID-ta oboshshoi pass korte hobe
-        user.id = existUser._id.toString();
       }
       return true;
     },
@@ -79,6 +84,19 @@ export const authOption: NextAuthOptions = {
       }
       return session;
     }
+  },
+  // 👇 STRICT SECURITY: Vercel node proxy and secure cookie mismatch handling
+  useSecureCookies: process.env.NODE_ENV === "production",
+  cookies: {
+    pkceCodeVerifier: {
+      name: `next-auth.pkce.code_verifier`,
+      options: {
+        httpOnly: true,
+        sameSite: 'lax',
+        path: '/',
+        secure: process.env.NODE_ENV === "production",
+      },
+    },
   },
   session: {
     strategy: 'jwt',
