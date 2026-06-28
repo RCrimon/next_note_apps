@@ -13,22 +13,17 @@ export const authOption: NextAuthOptions = {
         email: { label: 'Email', type: 'text' },
         password: { label: 'password', type: 'password' }
       },
-      async authorize(credentials, req) {
+      async authorize(credentials) {
         let email = credentials?.email;
         let password = credentials?.password;
-        if (!email || !password) {
-          throw new Error('all fields must be filled up');
-        }
+        if (!email || !password) throw new Error('all fields must be filled up');
 
         await connectDb();
         let user = await User.findOne({ email });
-        if (!user || !user.password) { // 👈 Google user jodi password chada thake
-          throw new Error('user cannot be matched');
-        }
+        if (!user || !user.password) throw new Error('user cannot be matched');
+
         let isMatch = await bcrypt.compare(password, user.password);
-        if (!isMatch) {
-          throw new Error('user cannot be matched');
-        }
+        if (!isMatch) throw new Error('user cannot be matched');
 
         return {
           id: user._id.toString(),
@@ -46,23 +41,16 @@ export const authOption: NextAuthOptions = {
   callbacks: {
     async signIn({ account, user }) {
       if (account?.provider === 'google') {
-        try {
-          await connectDb();
-          let existUser = await User.findOne({ email: user.email });
-          if (!existUser) {
-            existUser = await User.create({
-              name: user.name,
-              email: user.email,
-              image: user.image,
-              // password field blank thakbe google sign-in er jonno
-            });
-          }
-          user.id = existUser._id.toString();
-          return true;
-        } catch (error) {
-          console.error("Error in signIn callback:", error);
-          return false; // Error hole direct false hobe, jate crash na hoy
+        await connectDb();
+        let existUser = await User.findOne({ email: user.email });
+        if (!existUser) {
+          existUser = await User.create({
+            name: user.name,
+            email: user.email,
+            image: user.image
+          });
         }
+        user.id = existUser._id.toString();
       }
       return true;
     },
@@ -84,19 +72,6 @@ export const authOption: NextAuthOptions = {
       }
       return session;
     }
-  },
-  // 👇 STRICT SECURITY: Vercel node proxy and secure cookie mismatch handling
-  useSecureCookies: process.env.NODE_ENV === "production",
-  cookies: {
-    pkceCodeVerifier: {
-      name: `next-auth.pkce.code_verifier`,
-      options: {
-        httpOnly: true,
-        sameSite: 'lax',
-        path: '/',
-        secure: process.env.NODE_ENV === "production",
-      },
-    },
   },
   session: {
     strategy: 'jwt',
